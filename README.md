@@ -14,7 +14,7 @@ Example configs:
 
 ```
 transforms=decode
-transforms.decode.type=com.github.yashmayya.kafka.connect.smt.BytesToString$Value
+transforms.decode.type=com.github.saroha87.kafka.connect.smt.HexStringToBytes$Value
 transforms.decode.field="ipAddress"
 ```
 

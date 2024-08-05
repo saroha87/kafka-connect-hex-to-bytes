@@ -6,6 +6,9 @@ public class Hex
 
 	public static byte[] hexStringToByteArray(String hex)
 	{
+		if(hex == null) {
+			return null;
+		}
 	    int len = hex.length();
 	    byte[] bin = new byte[len / 2];
 	    for (int i = 0; i < len; i += 2) {
@@ -17,7 +20,10 @@ public class Hex
 	
 	public static String byteArrayToHexString(byte in[]) 
 	{
-	    byte ch = 0x00;
+	    if(in == null) {
+	    	return null;
+	    }
+		byte ch = 0x00;
 	    int i = 0; 
 
 	    if (in == null || in.length <= 0)

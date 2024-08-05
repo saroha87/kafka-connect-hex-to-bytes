@@ -49,4 +49,15 @@ public class BytesToStringTest {
         final SourceRecord transformedRecord = transform.apply(record);
         assertArrayEquals(Hex.hexStringToByteArray(test),(byte[]) ((Struct) transformedRecord.value()).get("name"));
     }
+    
+    @Test
+    public void testWithSchemaNoFieldValue() {
+        String test = "0ABB1831";
+        final Schema structSchema = SchemaBuilder.struct().name("testSchema").field("name", Schema.STRING_SCHEMA).field("ip", Schema.INT32_SCHEMA).build();
+        final Struct struct = new Struct(structSchema).put("ip", 7);
+        final SourceRecord record = new SourceRecord(null, null, "topic", structSchema, struct);
+        final SourceRecord transformedRecord = transform.apply(record);
+        assertArrayEquals(null,(byte[]) ((Struct) transformedRecord.value()).get("name"));
+    }
+    
 }

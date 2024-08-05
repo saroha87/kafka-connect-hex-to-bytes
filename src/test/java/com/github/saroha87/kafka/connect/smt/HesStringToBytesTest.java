@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import com.github.saroha87.kafka.connect.smt.HexStringToBytes.Value;
 
-public class BytesToStringTest {
+public class HesStringToBytesTest {
     private final HexStringToBytes<SourceRecord> transform = new Value<>();
 
     @Before

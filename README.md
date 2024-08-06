@@ -8,7 +8,7 @@ Properties:
 
 |Name|Description|Type|Importance|
 |---|---|---|---|
-|`field`| Field name to decode | String| High |
+|`field`| comma separated Field names to decode | String| High |
 
 Example configs:
 

@@ -3,8 +3,13 @@ package com.github.saroha87.kafka.connect.smt;
 import static org.apache.kafka.connect.transforms.util.Requirements.requireMap;
 import static org.apache.kafka.connect.transforms.util.Requirements.requireStruct;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Importance;
 import org.apache.kafka.common.config.ConfigDef.Type;
@@ -20,13 +25,18 @@ public abstract class HexStringToBytes<R extends ConnectRecord<R>> implements Tr
 	static String FIELD_NAME = "field";
 	private static final String PURPOSE = "Decode a HEX encoded field";
 	static final ConfigDef CONFIG_DEF = new ConfigDef().define(FIELD_NAME, Type.STRING, Importance.HIGH, PURPOSE);
-	private String fieldName;
+	private Set<String> fieldNames = null;
 	private final Map<Schema, Schema> schemaLookup = new HashMap<>();
 
 	@Override
 	public void configure(Map<String, ?> props) {
 		SimpleConfig config = new SimpleConfig(CONFIG_DEF, props);
-		fieldName = config.getString(FIELD_NAME);
+		String fieldName = config.getString(FIELD_NAME);
+		if(fieldName == null || fieldName.isBlank()) {
+			fieldNames = Collections.emptySet();
+		}else {
+			fieldNames = Arrays.stream(fieldName.split(",")).collect(Collectors.toSet());
+		}
 	}
 
 	@Override
@@ -42,12 +52,12 @@ public abstract class HexStringToBytes<R extends ConnectRecord<R>> implements Tr
 		Object recordVal = actualValue(record);
 		if (recordVal == null) {
 			return newRecord(record, null, null);
-		} else if (fieldName == null || fieldName.isEmpty()) {
+		} else if (fieldNames == null || fieldNames.isEmpty()) {
 			return newRecord(record, null, recordVal);
 		} else {
 			final Map<String, Object> value = requireMap(recordVal, PURPOSE);
 			final Map<String, Object> updatedValue = new HashMap<>(value);
-			updatedValue.put(fieldName, Hex.hexStringToByteArray((String) value.get(fieldName)));
+			fieldNames.forEach(v -> updatedValue.put(v, Hex.hexStringToByteArray((String) value.get(v))));
 			return newRecord(record, null, updatedValue);
 		}
 	}
@@ -56,7 +66,7 @@ public abstract class HexStringToBytes<R extends ConnectRecord<R>> implements Tr
 		Object recordVal = actualValue(record);
 		if (recordVal == null) {
 			return newRecord(record, null, null);
-		} else if (fieldName == null || fieldName.isEmpty()) {
+		} else if (fieldNames == null || fieldNames.isEmpty()) {
 			return newRecord(record, null, recordVal);
 		} else {
 			final Struct value = requireStruct(recordVal, PURPOSE);
@@ -75,8 +85,8 @@ public abstract class HexStringToBytes<R extends ConnectRecord<R>> implements Tr
 					builder.version(inputSchema.version() + 1);
 				}
 				for (Field field : inputSchema.fields()) {
-					if (field.name().equals(fieldName)) {
-						builder.field(fieldName, Schema.OPTIONAL_BYTES_SCHEMA);
+					if (fieldNames.contains(field.name())) {
+						builder.field(field.name(), Schema.OPTIONAL_BYTES_SCHEMA);
 					} else {
 						builder.field(field.name(), field.schema());
 					}
@@ -86,8 +96,8 @@ public abstract class HexStringToBytes<R extends ConnectRecord<R>> implements Tr
 			final Struct updatedValue = new Struct(updatedSchema);
 
 			for (Field field : value.schema().fields()) {
-				if (field.name().equals(fieldName)) {
-					updatedValue.put(fieldName, Hex.hexStringToByteArray((String) value.get(fieldName)));
+				if (fieldNames.contains(field.name())) {
+					updatedValue.put(field.name(), Hex.hexStringToByteArray((String) value.get(field.name())));
 				} else {
 					updatedValue.put(field.name(), value.get(field));
 				}

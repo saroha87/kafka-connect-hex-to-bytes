@@ -23,6 +23,7 @@ public class HesStringToBytesTest {
     public void setUp() {
         final Map<String, Object> props = new HashMap<>();
         props.put(HexStringToBytes.FIELD_NAME, "name");
+        //props.put(HexStringToBytes.NULL_NAME, "false");
         transform.configure(props);
     }
 
@@ -37,7 +38,7 @@ public class HesStringToBytesTest {
         final SourceRecord record = new SourceRecord(null, null, "topic", null,
                 Collections.singletonMap("name", test));
         final SourceRecord transformedRecord = transform.apply(record);
-        assertArrayEquals(Hex.hexStringToByteArray(test), (byte[]) ((Map) transformedRecord.value()).get("name"));
+        assertArrayEquals(Hex.hexStringToByteArray(test, false), (byte[]) ((Map) transformedRecord.value()).get("name"));
     }
 
     @Test

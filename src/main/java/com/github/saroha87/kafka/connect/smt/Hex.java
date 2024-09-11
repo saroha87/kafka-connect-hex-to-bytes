@@ -1,7 +1,10 @@
 package com.github.saroha87.kafka.connect.smt;
 
+import java.util.regex.Pattern;
+
 public class Hex {
 	static String pseudo[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F" };
+	static final Pattern VALID_STR = Pattern.compile("[A-F0-9]+");
 
 	public static byte[] hexStringToByteArray(String hex) {
 		if (hex == null) {
@@ -17,14 +20,9 @@ public class Hex {
 
 	}
 
-	public static byte[] hexStringToByteArray(String hex, boolean nullOnException) {
-		if (nullOnException) {
-			try {
-				return hexStringToByteArray(hex);
-
-			} catch (Exception e) {
+	public static byte[] hexStringToByteArray(String hex, boolean nullOnImproperFormat) {
+		if (hex == null || (nullOnImproperFormat && !VALID_STR.matcher(hex).matches())) {
 				return null;
-			}
 		} else {
 			return hexStringToByteArray(hex);
 		}

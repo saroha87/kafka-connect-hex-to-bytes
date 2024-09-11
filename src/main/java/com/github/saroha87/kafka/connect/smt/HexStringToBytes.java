@@ -23,20 +23,20 @@ import org.apache.kafka.connect.transforms.util.SimpleConfig;
 
 public abstract class HexStringToBytes<R extends ConnectRecord<R>> implements Transformation<R> {
 	static String FIELD_NAME = "field";
-	static String NULL_NAME = "NullOnException";
+	static String NULL_NAME = "NullOnImproperFormat";
 	private static final String PURPOSE = "Decode a HEX encoded field";
 	static final ConfigDef CONFIG_DEF = new ConfigDef().define(FIELD_NAME, Type.STRING, Importance.HIGH, PURPOSE).define(NULL_NAME, Type.BOOLEAN, Boolean.FALSE, Importance.LOW,
 			"Return null on failed Hex transformation");
 
 	private Set<String> fieldNames = null;
-	private boolean nullOnException = false;
+	private boolean nullOnImproperFormat = false;
 	private final Map<Schema, Schema> schemaLookup = new HashMap<>();
 
 	@Override
 	public void configure(Map<String, ?> props) {
 		SimpleConfig config = new SimpleConfig(CONFIG_DEF, props);
 		String fieldName = config.getString(FIELD_NAME);
-		nullOnException = config.getBoolean(NULL_NAME);
+		nullOnImproperFormat = config.getBoolean(NULL_NAME);
 		if (fieldName == null || fieldName.isBlank()) {
 			fieldNames = Collections.emptySet();
 		} else {
@@ -62,7 +62,7 @@ public abstract class HexStringToBytes<R extends ConnectRecord<R>> implements Tr
 		} else {
 			final Map<String, Object> value = requireMap(recordVal, PURPOSE);
 			final Map<String, Object> updatedValue = new HashMap<>(value);
-			fieldNames.forEach(v -> updatedValue.put(v, Hex.hexStringToByteArray((String) value.get(v), nullOnException)));
+			fieldNames.forEach(v -> updatedValue.put(v, Hex.hexStringToByteArray((String) value.get(v), nullOnImproperFormat)));
 			return newRecord(record, null, updatedValue);
 		}
 	}
@@ -102,7 +102,7 @@ public abstract class HexStringToBytes<R extends ConnectRecord<R>> implements Tr
 
 			for (Field field : value.schema().fields()) {
 				if (fieldNames.contains(field.name())) {
-					updatedValue.put(field.name(), Hex.hexStringToByteArray((String) value.get(field.name()), nullOnException));
+					updatedValue.put(field.name(), Hex.hexStringToByteArray((String) value.get(field.name()), nullOnImproperFormat));
 				} else {
 					updatedValue.put(field.name(), value.get(field));
 				}

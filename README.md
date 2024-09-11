@@ -9,7 +9,7 @@ Properties:
 |Name|Description|Type|Importance|
 |---|---|---|---|
 |`field`| comma separated Field names to decode | String| High |
-|`NullOnException`| Return null on failed Hex transformation. Default Value: false | String| Low |
+|`NullOnImproperFormat`| Return null on failed Hex transformation. Default Value: false | String| Low |
 
 Example configs:
 
@@ -17,7 +17,7 @@ Example configs:
 transforms=decode
 transforms.decode.type=com.github.saroha87.kafka.connect.smt.HexStringToBytes$Value
 transforms.decode.field="ipAddress1,ipAddress2"
-transforms.decode.NullOnException=true
+transforms.decode.NullOnImproperFormat=true
 ```
 
 ----------

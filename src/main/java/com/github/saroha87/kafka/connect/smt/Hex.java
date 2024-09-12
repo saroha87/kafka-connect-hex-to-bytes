@@ -7,9 +7,6 @@ public class Hex {
 	static final Pattern VALID_STR = Pattern.compile("[A-F0-9]+");
 
 	public static byte[] hexStringToByteArray(String hex) {
-		if (hex == null) {
-			return null;
-		}
 
 		int len = hex.length();
 		byte[] bin = new byte[len / 2];
@@ -21,8 +18,16 @@ public class Hex {
 	}
 
 	public static byte[] hexStringToByteArray(String hex, boolean nullOnImproperFormat) {
-		if (hex == null || (nullOnImproperFormat && !VALID_STR.matcher(hex).matches())) {
+		if (hex == null) {
+			return null;
+		} else if (!VALID_STR.matcher(hex).matches()) {
+			if (nullOnImproperFormat) {
 				return null;
+
+			} else {
+
+				throw new RuntimeException("Wrong HEX format");
+			}
 		} else {
 			return hexStringToByteArray(hex);
 		}
